@@ -14,7 +14,7 @@
     "node": ">=18.17"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.5",
+    "@eslint/js": "^10.0.1",
     "@types/node": "^18.19.130",
     "@types/pixelmatch": "^5.2.6",
     "@types/pngjs": "^6.0.5",
@@ -24,12 +24,12 @@
     "cypress-axe": "^1.7.0",
     "cypress-mochawesome-reporter": "^5.0.0",
     "dotenv": "^18.0.9",
-    "eslint": "^9.39.5",
-    "eslint-plugin-cypress": "^5.3.0",
+    "eslint": "^10.14.0",
+    "eslint-plugin-cypress": "^7.0.2",
     "lighthouse": "^11.7.1",
     "pixelmatch": "^5.3.0",
     "pngjs": "^7.0.0",
-    "typescript": "5.6",
+    "typescript": "7.0",
     "typescript-eslint": "^8.72.1"
   }
 }
