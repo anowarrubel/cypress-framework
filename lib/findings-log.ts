@@ -7,6 +7,7 @@ export interface FindingRecord {
   suite: string;
   site: string;
   env: string;
+  browser: string;
   id: string;
   title: string;
   status: FindingStatus;

@@ -1,57 +1,42 @@
-/**
- * One entry per site under test. Each declares a base URL per environment, so
- * the same specs run against dev, qa or prod by changing TEST_ENV.
- *
- * The three sample sites are public demo apps with one host each, so all
- * three environments point at the same URL. For a real project set
- * <SITE>_<ENV>_URL (e.g. SAUCEDEMO_QA_URL) in .env or CI; see getBaseUrl().
- */
+// One entry per site. The demo sites have a single host, so dev, qa and prod
+// all point at it; for a real project set <SITE>_<ENV>_URL instead.
 import { TestEnv, readVar } from './env';
 import { AnalyticsVendorId } from './analytics-vendors';
 
 export type SiteId = 'demoqa' | 'academybugs' | 'saucedemo';
 
 export interface AnalyticsConfig {
-  /** Vendors expected to call on page load. An empty list asserts the site loads no tracking at all. */
   vendors: AnalyticsVendorId[];
-  /** Data layer name when it isn't `dataLayer` (Adobe uses 'adobeDataLayer'). */
   dataLayerName?: string;
-  /** Data layer `event` names that must appear after page load. */
   dataLayerEvents?: string[];
 }
 
-/** One API call to verify: what to send and what a good answer looks like. */
 export interface ApiEndpoint {
   title: string;
-  /** Appended to the site's API base URL. */
   path: string;
   method?: 'GET' | 'POST';
-  /** Expected HTTP status. Negative cases (400, 401, 404) belong here too. */
   status: number;
   /** Expected list shape. `arrayAt` names the property holding it ('' when the body is the list). */
   list?: { arrayAt: string; itemKeys: string[]; minItems?: number };
-  /** Keys that must exist at the top level of an object body. */
   keys?: string[];
 }
 
 export interface ApiConfig {
-  /** Appended to the site's base URL, so a <SITE>_<ENV>_URL override applies. */
   basePath?: string;
-  /** Every endpoint must answer faster than this. Default 3000 ms. */
   maxResponseMs?: number;
   endpoints: ApiEndpoint[];
 }
 
 export interface VisualPage {
-  /** Part of the baseline file name, so keep it short and stable. */
   name: string;
   path: string;
-  /** Selectors to blank out before comparing (dates, ads, anything that moves). */
   mask?: string[];
   viewport?: { width: number; height: number };
+  /** Share of pixels allowed to differ, 0-1. Default 0.002. */
+  tolerance?: number;
 }
 
-/** Lighthouse thresholds. Category scores are 0-1; the metrics are in ms (CLS is unitless). */
+// Category scores are 0-1, metrics are ms (CLS has no unit).
 export interface LighthouseBudget {
   performance: number;
   accessibility: number;
@@ -76,17 +61,14 @@ export interface SiteConfig {
   a11yKnownIssues?: Record<string, string>;
   securityKnownIssues?: Record<string, string>;
   seoKnownIssues?: Record<string, string>;
-  /** Keyed '<viewport>:<check id>', e.g. 'mobile:no-horizontal-scroll'. */
   responsiveKnownIssues?: Record<string, string>;
   i18nKnownIssues?: Record<string, string>;
   lighthouseKnownIssues?: Record<string, string>;
   linkKnownIssues?: Record<string, string>;
 
-  /** Omit any of these to skip that suite for the site. */
   analytics?: AnalyticsConfig;
   api?: ApiConfig;
   visual?: VisualPage[];
-  /** Overrides on top of DEFAULT_LIGHTHOUSE_BUDGET. */
   lighthouseBudget?: Partial<LighthouseBudget>;
 }
 
@@ -137,6 +119,9 @@ export const sites: Record<SiteId, SiteConfig> = {
       'accessibility-score': 'Scores about 75: missing alt text and unnamed links',
       'seo-score': 'Scores about 77: no meta description',
       lcp: 'Largest contentful paint is around 11 seconds on the throttled mobile profile',
+    },
+    linkKnownIssues: {
+      'links-found': 'Category cards are click handlers, not anchors, so there is nothing to crawl',
     },
     // Tag Manager announces itself with a 'gtm.js' event once it has loaded.
     analytics: { vendors: ['gtm', 'ua'], dataLayerEvents: ['gtm.js'] },
@@ -191,7 +176,7 @@ export const sites: Record<SiteId, SiteConfig> = {
       lcp: 'Largest contentful paint is around 5 seconds on the throttled mobile profile',
     },
     linkKnownIssues: {
-      'broken-links': '/academy-team/ is linked from the home page but returns 404',
+      'broken-link:/academy-team/': 'Linked from the home page but returns 404',
     },
     analytics: { vendors: ['ga4'] },
     // WordPress ships a public REST API.
@@ -244,6 +229,9 @@ export const sites: Record<SiteId, SiteConfig> = {
     lighthouseKnownIssues: {
       'best-practices-score': 'Scores about 74 on the home page',
     },
+    linkKnownIssues: {
+      'links-found': 'The login page has no links',
+    },
     // An empty vendor list asserts that the site loads no analytics or tracking.
     analytics: { vendors: [] },
     // Static pages only: a baseline is useless if the page changes by itself.
@@ -264,15 +252,18 @@ export function getSite(id: SiteId): SiteConfig {
 
 /** <SITE>_<ENV>_URL (for example DEMOQA_DEV_URL) wins over config, so real hosts need no code change. */
 export function getBaseUrl(id: SiteId, env: TestEnv): string {
-  return readVar(`${id}_${env}_URL`.toUpperCase()) ?? getSite(id).baseUrls[env];
+  const name = `${id}_${env}_URL`.toUpperCase().replace(/[^A-Z0-9]/g, '_');
+  return readVar(name) ?? getSite(id).baseUrls[env];
 }
 
-/** Sites this run covers: the SITE filter if set, otherwise all of them. */
+/** Sites this run covers: the SITE filter (one id or a comma-separated list), otherwise all. */
 export function activeSites(): SiteConfig[] {
-  const wanted = readVar('SITE')?.toLowerCase();
-  if (!wanted) return Object.values(sites);
-  if (!(wanted in sites)) {
-    throw new Error(`SITE="${wanted}" is not registered. Add it to config/sites.ts or clear the variable.`);
-  }
-  return [sites[wanted as SiteId]];
+  const wanted = readVar('SITE')?.toLowerCase().split(',').map((s) => s.trim()).filter(Boolean);
+  if (!wanted?.length) return Object.values(sites);
+  return wanted.map((id) => {
+    if (!Object.prototype.hasOwnProperty.call(sites, id)) {
+      throw new Error(`SITE="${id}" is not registered. Add it to config/sites.ts or clear the variable.`);
+    }
+    return sites[id as SiteId];
+  });
 }

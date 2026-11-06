@@ -1,5 +1,5 @@
 import { activeSites } from '../../../config/sites';
-import { expectFinding } from '../../support/findings';
+import { Finding, expectFindings } from '../../support/findings';
 import { label, urlFor } from '../../support/run';
 
 const MAX_LINKS = 30;
@@ -17,24 +17,32 @@ for (const site of activeSites()) {
             .filter((href, i, all) => all.indexOf(href) === i)
             .slice(0, MAX_LINKS);
 
-          const broken: string[] = [];
+          const broken: { status: number; path: string }[] = [];
           cy.wrap(links, { log: false }).each((href: string) => {
             cy.request({ url: href, failOnStatusCode: false, timeout: 30_000, log: false }).then((res) => {
-              if (res.status >= 400) broken.push(`${res.status} ${href}`);
+              if (res.status >= 400) broken.push({ status: res.status, path: new URL(href).pathname });
             });
           });
 
           cy.then(() => {
-            expectFinding(
-              { suite: 'links', site: site.id },
-              {
-                id: 'broken-links',
-                title: 'Same-site links resolve',
-                passed: broken.length === 0,
-                detail: broken.length ? `${broken.length} of ${links.length} broken: ${broken.slice(0, 5).join(', ')}` : `${links.length} checked, none broken`,
-              },
-              site.linkKnownIssues,
-            );
+            const known = site.linkKnownIssues ?? {};
+            const findings: Finding[] = broken.map(({ status, path }) => ({
+              id: `broken-link:${path}`,
+              title: 'Same-site link resolves',
+              passed: false,
+              detail: `HTTP ${status}`,
+            }));
+            const seen = new Set(findings.map((f) => f.id));
+            for (const id of Object.keys(known).filter((k) => !seen.has(k) && k !== 'links-found')) {
+              findings.push({ id, title: 'Same-site link resolves', passed: true, detail: 'now resolves' });
+            }
+            findings.push({
+              id: 'links-found',
+              title: 'Home page has same-site links to check',
+              passed: links.length > 0,
+              detail: `${links.length} found`,
+            });
+            expectFindings({ suite: 'links', site: site.id }, findings, known);
           });
         });
       });

@@ -9,7 +9,7 @@ dotenv.config({ quiet: true });
 
 // Variables the specs read through Cypress.env(): the run selectors, Sauce
 // Demo logins, and any <SITE>_<ENV>_URL host override.
-const PASS_THROUGH = /^(CI|TEST_ENV|SITE|UPDATE_SNAPSHOTS|RUN_VISUAL|SAUCE_USERNAME|SAUCE_PASSWORD|[A-Z]+_(DEV|QA|PROD)_URL)$/;
+const PASS_THROUGH = /^(CI|TEST_ENV|SITE|UPDATE_SNAPSHOTS|RUN_VISUAL|SAUCE_USERNAME|SAUCE_PASSWORD|[A-Z0-9_]+_(DEV|QA|PROD)_URL)$/;
 
 export default defineConfig({
   e2e: {

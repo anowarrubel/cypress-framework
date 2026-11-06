@@ -1,10 +1,5 @@
-/**
- * Which environment are we testing? Driven by TEST_ENV, default "qa".
- *
- * This file is loaded twice: by Node (cypress.config.ts, tasks) and inside the
- * browser bundle that runs the specs. Cypress.env() only exists in the latter,
- * so readVar() asks whichever one is available.
- */
+// Loaded by Node (config, tasks) and by the spec bundle in the browser;
+// only the latter has Cypress.env(), hence readVar().
 
 export type TestEnv = 'dev' | 'qa' | 'prod';
 

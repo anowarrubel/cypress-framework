@@ -19,12 +19,16 @@ describe('Locale formatting in the browser', () => {
     });
   }
 
-  it('Arabic locale resolves to right-to-left text', () => {
+  it('Arabic locale resolves to right-to-left text', function () {
     cy.window().then((win) => {
-      const info = new win.Intl.Locale('ar-SA') as Intl.Locale & { textInfo?: { direction: string }; getTextInfo?: () => { direction: string } };
-      const direction = (info.getTextInfo?.() ?? info.textInfo)?.direction;
-      // Not every browser exposes textInfo yet; when it does, it must say rtl.
-      if (direction) expect(direction).to.equal('rtl');
+      const locale = new win.Intl.Locale('ar-SA') as Intl.Locale & {
+        textInfo?: { direction: string };
+        getTextInfo?: () => { direction: string };
+      };
+      const direction = (locale.getTextInfo?.() ?? locale.textInfo)?.direction;
+      // Firefox doesn't expose text direction on Intl.Locale yet.
+      if (!direction) return this.skip();
+      expect(direction).to.equal('rtl');
     });
   });
 });

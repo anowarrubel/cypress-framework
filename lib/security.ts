@@ -31,9 +31,9 @@ function head(url: string, timeoutMs = 15_000): Promise<RawResponse> {
   });
 }
 
-function checkCertificate(hostname: string): Promise<{ daysUntilExpiry: number } | { error: string }> {
+function checkCertificate(hostname: string, port: number): Promise<{ daysUntilExpiry: number } | { error: string }> {
   return new Promise((resolve) => {
-    const socket = tls.connect({ host: hostname, port: 443, servername: hostname, timeout: 10_000 }, () => {
+    const socket = tls.connect({ host: hostname, port, servername: hostname, timeout: 10_000 }, () => {
       const cert = socket.getPeerCertificate();
       socket.end();
       if (!cert?.valid_to) return resolve({ error: 'no certificate returned' });
@@ -51,7 +51,7 @@ export async function gatherSecurityContext(baseUrl: string): Promise<SecurityCo
   const url = new URL(baseUrl);
   const isHttps = url.protocol === 'https:';
 
-  // Follow same-host redirects by hand (apex -> www is common) but stop at the first real page.
+  // Follow redirects by hand (apex to www is common) and judge the page they end on.
   let response = await head(baseUrl);
   for (let hops = 0; hops < 5 && response.status >= 300 && response.status < 400 && response.headers.location; hops++) {
     response = await head(new URL(response.headers.location, baseUrl).toString());
@@ -79,6 +79,6 @@ export async function gatherSecurityContext(baseUrl: string): Promise<SecurityCo
     headers,
     setCookies,
     httpRedirectsToHttps,
-    tls: isHttps ? await checkCertificate(url.hostname) : null,
+    tls: isHttps ? await checkCertificate(url.hostname, Number(url.port) || 443) : null,
   };
 }

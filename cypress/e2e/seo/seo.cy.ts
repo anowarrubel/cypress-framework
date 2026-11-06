@@ -15,15 +15,16 @@ for (const site of activeSites()) {
           cy.request({ url: `${origin}/robots.txt`, failOnStatusCode: false }).then((robots) => {
             const body = robots.status === 200 ? String(robots.body) : '';
             const robotsTxtValid = looksLikeRobotsFile(body);
-            const declared = /^\s*sitemap:/im.test(body);
+            // robots.txt may point at the sitemap; otherwise try the conventional spot.
+            const declared = /^\s*sitemap:\s*(\S+)/im.exec(body)?.[1];
 
-            cy.request({ url: `${origin}/sitemap.xml`, failOnStatusCode: false }).then((sitemap) => {
+            cy.request({ url: declared ?? `${origin}/sitemap.xml`, failOnStatusCode: false }).then((sitemap) => {
               snapshot = {
                 url: doc.location.href,
                 ...dom,
                 robotsTxtStatus: robots.status,
                 robotsTxtValid,
-                hasSitemap: declared || (sitemap.status === 200 && looksLikeSitemap(String(sitemap.body))),
+                hasSitemap: sitemap.status === 200 && looksLikeSitemap(String(sitemap.body)),
               };
             });
           });

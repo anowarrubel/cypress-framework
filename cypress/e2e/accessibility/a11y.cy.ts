@@ -1,9 +1,9 @@
 import type { Result } from 'axe-core';
 import { activeSites } from '../../../config/sites';
-import { expectFinding } from '../../support/findings';
+import { Finding, expectFindings } from '../../support/findings';
 import { env, label, urlFor } from '../../support/run';
 
-type AxeWindow = Window & { axe: { run(context: Document, options: object): Promise<{ violations: Result[] }> } };
+type AxeWindow = Window & { axe: { run(context: Document, options: object): Promise<{ violations: Result[]; passes: Result[] }> } };
 
 // Cumulative: AA includes A.
 const WCAG_AA = ['wcag2a', 'wcag21a', 'wcag2aa', 'wcag21aa'];
@@ -19,7 +19,7 @@ for (const site of activeSites()) {
 
       cy.window().then((win) =>
         (win as AxeWindow).axe.run(win.document, { runOnly: { type: 'tag', values: WCAG_AA } }),
-      ).then(({ violations }) => {
+      ).then(({ violations, passes }) => {
         cy.writeFile(`reports/axe/${site.id}-${env}.json`, violations, { log: false });
 
         const summary = violations
@@ -27,18 +27,21 @@ for (const site of activeSites()) {
           .join('\n');
         if (summary) cy.task('log', summary, { log: false });
 
-        const scope = { suite: 'accessibility', site: site.id };
         const blocking = violations.filter((v) => v.impact && BLOCKING_IMPACT.includes(v.impact));
-
-        for (const v of blocking) {
-          expectFinding(scope, { id: v.id, title: v.help, passed: false, detail: `${v.impact}, ${v.nodes.length} node(s): ${v.helpUrl}` }, known);
-        }
-        // Known issues that no longer show up: say so, so the entry can go.
+        const findings: Finding[] = blocking.map((v) => ({
+          id: v.id,
+          title: v.help,
+          passed: false,
+          detail: `${v.impact}, ${v.nodes.length} node(s): ${v.helpUrl}`,
+        }));
+        // Known issues that no longer show up: report them so the entry can go.
         const seen = new Set(blocking.map((v) => v.id));
         for (const id of Object.keys(known).filter((k) => !seen.has(k))) {
-          expectFinding(scope, { id, title: id, passed: true, detail: 'not reported' }, known);
+          findings.push({ id, title: id, passed: true, detail: 'not reported' });
         }
-        expectFinding(scope, { id: 'axe-scan', title: 'axe scan completed', passed: true, detail: `${violations.length} violation(s) in total` });
+
+        expect(passes.length, 'axe evaluated some rules').to.be.greaterThan(0);
+        expectFindings({ suite: 'accessibility', site: site.id }, findings, known);
       });
     });
   });

@@ -1,19 +1,13 @@
 #!/usr/bin/env node
 /**
- * Test launcher. Name what to run in any order, pass flags, or run it bare in
- * a terminal for a menu.
- *
+ * Test launcher.
  *   npm run t -- demoqa prod seo            (chrome, headless)
  *   npm run t -- demoqa:prod:seo:firefox
  *   npm run t -- --suite=security,seo --site=saucedemo --env=prod --headed
  *
  * Flags: --suite --site --env --browser, --headed --open --update --yes.
- * --open starts the Cypress app instead of a headless run; --update refreshes
- * visual baselines; --yes never shows the menu. Anything after a second "--"
- * goes straight to `cypress run`.
- *
- * Left out: env comes from .env (else qa), browser is chrome, site and suite
- * are all. The menu never shows in CI.
+ * Anything after a second "--" goes to `cypress run`. Run bare in a terminal
+ * for a menu (never shown in CI).
  */
 import { spawn } from 'node:child_process';
 import { mkdirSync, readFileSync, rmSync } from 'node:fs';
@@ -27,6 +21,7 @@ dotenv.config({ path: join(root, '.env'), quiet: true });
 
 const SUITES = {
   functional: 'functional',
+  config: 'config',
   accessibility: 'accessibility',
   security: 'security',
   seo: 'seo',
@@ -94,10 +89,10 @@ for (const arg of [...fromNpm, ...ownArgs]) {
   for (const raw of arg.split(':').filter(Boolean)) {
     const word = ALIASES[raw] ?? raw;
     if (word === 'all') continue;
-    if (SITES.includes(word)) flags.site = word;
+    if (SITES.includes(word)) flags.site = flags.site ? `${flags.site},${word}` : word;
     else if (ENVS.includes(word)) flags.env = word;
     else if (BROWSERS.includes(word)) flags.browser = word;
-    else if (word in SUITES) flags.suite = flags.suite ? `${flags.suite},${word}` : word;
+    else if (Object.hasOwn(SUITES, word)) flags.suite = flags.suite ? `${flags.suite},${word}` : word;
     else fail(`Don't know "${raw}". Sites: ${SITES.join(', ')} | envs: ${ENVS.join(', ')} | browsers: ${BROWSERS.join(', ')} | suites: ${Object.keys(SUITES).join(', ')}`);
   }
 }
@@ -131,11 +126,12 @@ if (interactive) {
 
 suite = (suite || 'all').split(',').map((s) => ALIASES[s.trim()] ?? s.trim());
 site = site || 'all';
+if (site.split(',').includes('all')) site = 'all';
 env = env || process.env.TEST_ENV || 'qa';
 browser = browser || 'chrome';
 
 check('suite', suite, Object.keys(SUITES), ['all']);
-check('site', [site], SITES, ['all']);
+check('site', site.split(','), SITES, ['all']);
 check('env', [env], ENVS);
 check('browser', [browser], BROWSERS);
 

@@ -2,11 +2,7 @@ import { ANALYTICS_VENDORS, AnalyticsVendorId } from '../../config/analytics-ven
 
 export type DataLayerEntry = Record<string, unknown>;
 
-/**
- * Starts recording every request the page makes. Call it BEFORE cy.visit():
- * anything fired earlier is invisible. The returned array fills in as the
- * page loads.
- */
+// Call before cy.visit(); requests made earlier are missed.
 export function trackRequests(): string[] {
   const urls: string[] = [];
   cy.intercept({ url: /.*/ }, (req) => {
@@ -17,7 +13,6 @@ export function trackRequests(): string[] {
 
 export function expectVendorRequest(urls: string[], id: AnalyticsVendorId, timeout = 15_000): void {
   const vendor = ANALYTICS_VENDORS[id];
-  // should() re-runs the callback until it passes, so late requests are fine.
   cy.wrap(urls, { timeout }).should((seen) => {
     expect(
       seen.some((url) => vendor.request.test(url)),
@@ -48,11 +43,7 @@ export function expectDataLayerNotEmpty(name = 'dataLayer', timeout = 15_000): v
   });
 }
 
-/**
- * The data layer has an entry containing every key/value in `match`; extra
- * keys on the entry are fine, so only the parts that matter are asserted.
- *   expectDataLayerEntry({ event: 'purchase', value: 49.9 })
- */
+// Extra keys on the entry are fine, so only what matters is asserted.
 export function expectDataLayerEntry(match: DataLayerEntry, name = 'dataLayer', timeout = 15_000): void {
   const matches = (entry: DataLayerEntry) =>
     Object.entries(match).every(([key, value]) => JSON.stringify(entry[key]) === JSON.stringify(value));

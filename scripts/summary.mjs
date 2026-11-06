@@ -11,7 +11,13 @@ if (!existsSync(file)) {
   process.exit(0);
 }
 
-const rows = readFileSync(file, 'utf8').split('\n').filter(Boolean).map((line) => JSON.parse(line));
+// A retried test logs once per attempt; the last attempt is the one that counts.
+const latest = new Map();
+for (const line of readFileSync(file, 'utf8').split('\n').filter(Boolean)) {
+  const r = JSON.parse(line);
+  latest.set([r.suite, r.site, r.env, r.browser, r.id].join('|'), r);
+}
+const rows = [...latest.values()];
 const count = (status) => rows.filter((r) => r.status === status).length;
 const cell = (text) => String(text ?? '').replace(/\|/g, '\\|').replace(/\n/g, ' ');
 

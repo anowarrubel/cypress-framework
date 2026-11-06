@@ -22,7 +22,7 @@ on:
       suite:
         description: Test type
         type: choice
-        options: [all, functional, accessibility, security, seo, analytics, performance, responsive, api, visual, i18n, links]
+        options: [all, config, functional, accessibility, security, seo, analytics, performance, responsive, api, visual, i18n, links]
         default: all
       update_snapshots:
         description: Write visual baselines (download them from the run artifacts and commit)

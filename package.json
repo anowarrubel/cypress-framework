@@ -27,8 +27,6 @@
     "eslint": "^9.39.5",
     "eslint-plugin-cypress": "^5.3.0",
     "lighthouse": "^11.7.1",
-    "mochawesome-merge": "^5.1.1",
-    "mochawesome-report-generator": "^6.3.2",
     "pixelmatch": "^5.3.0",
     "pngjs": "^7.0.0",
     "typescript": "5.6",

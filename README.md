@@ -8,9 +8,7 @@ performance (Lighthouse), responsive, API, visual, i18n and broken-link checks
 run against three public demo sites (DemoQA, Academy Bugs, Sauce Demo), and
 GitHub Actions can run any combination on demand.
 
-It is the Cypress counterpart of
-[playwright-framework](https://github.com/anowarrubel/playwright-framework):
-same site config, same check ids, same known-issue pattern.
+Cypress counterpart of [playwright-framework](https://github.com/anowarrubel/playwright-framework): same sites, same check ids, same known-issue pattern.
 
 ## Setup
 
@@ -44,7 +42,7 @@ Suites: `functional`, `accessibility` (`a11y`), `security`, `seo`, `analytics`,
 `--update` (visual baselines), `--yes` (skip the menu). Anything after a second
 `--` goes straight to `cypress run`.
 
-`TEST_ENV` and `SITE` can also live in `.env`. To point a site at real hosts,
+`TEST_ENV` and `SITE` (one id or a comma-separated list) can also live in `.env`. To point a site at real hosts,
 set `<SITE>_<ENV>_URL` (for example `DEMOQA_QA_URL`); it overrides
 `config/sites.ts` for every suite, API included.
 
@@ -60,15 +58,15 @@ set `<SITE>_<ENV>_URL` (for example `DEMOQA_QA_URL`); it overrides
 | Performance | Lighthouse (mobile profile): performance, accessibility, best-practices and SEO scores, plus LCP, CLS and TBT budgets |
 | Responsive | at 375px and 768px: viewport meta, no sideways scroll, media fits, readable text |
 | API | status, JSON, response time and shape for each listed endpoint |
-| Visual | screenshot of each listed page against a baseline (2% pixel tolerance) |
+| Visual | screenshot of each listed page against a baseline (0.2% pixel tolerance) |
 | i18n | valid lang, UTF-8, hreflang, no garbled text, loads under de/ja/ar locales; locale formatting demo |
+| Config | every known-issue key names a real check and has a reason |
 | Links | the first 30 same-site links on the home page answer without a 4xx or 5xx |
 
 Everything is driven from `config/sites.ts`. Each site can define `analytics`,
 `api`, `visual`, `lighthouseBudget` and the known-issue lists below.
 
-Security, performance and API checks talk to the site from Node or their own
-Chrome, so they skip on Firefox instead of repeating the same result.
+Security, performance and API checks don't depend on the browser Cypress uses, so they skip on Firefox.
 
 ### Known issues
 
@@ -160,10 +158,3 @@ screenshots). Dependabot keeps npm packages and actions current.
 
 Optional secrets: `SAUCE_USERNAME` and `SAUCE_PASSWORD` (the public demo values
 are the default).
-
-## Debugging
-
-```bash
-npm run t -- demoqa seo --open      # Cypress app: time travel, selector playground
-npm run t -- demoqa seo --headed    # watch the run
-```

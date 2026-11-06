@@ -29,7 +29,7 @@ export function readI18n(doc: Document): Omit<I18nSnapshot, 'contentType'> {
       lang: el.getAttribute('hreflang') ?? '',
       href: (el as HTMLLinkElement).href,
     })),
-    brokenCharacters: ((doc.body?.innerText ?? '').match(/�/g) ?? []).length,
+    brokenCharacters: ((doc.body?.innerText ?? '').match(/\uFFFD/g) ?? []).length,
   };
 }
 

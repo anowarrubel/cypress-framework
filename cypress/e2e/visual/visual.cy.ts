@@ -2,7 +2,7 @@ import type { CompareResult } from '../../../lib/visual';
 import { activeSites } from '../../../config/sites';
 import { env, label, urlFor } from '../../support/run';
 
-const TOLERANCE = 0.02; // share of pixels allowed to differ
+const DEFAULT_TOLERANCE = 0.002;
 const update = Boolean(Cypress.env('UPDATE_SNAPSHOTS'));
 
 // Baselines are per OS and browser, and CI has no Linux ones until someone
@@ -38,7 +38,7 @@ if (!skipInCi) {
               baselinePath: baseline,
               diffPath: `reports/visual-diff/${shot}-${env}.png`,
               update,
-              tolerance: TOLERANCE,
+              tolerance: page.tolerance ?? DEFAULT_TOLERANCE,
             }),
           ).then((result) => {
             const ok = result.status === 'match' || result.status === 'baseline-written';
