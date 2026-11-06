@@ -113,6 +113,8 @@ export const sites: Record<SiteId, SiteConfig> = {
     },
     responsiveKnownIssues: {
       'mobile:no-horizontal-scroll': 'Home page is wider than a 375px phone screen',
+      'mobile:media-fits': 'An SVG (WB-u-E_TRWX.svg) is wider than the phone viewport',
+      'tablet:media-fits': 'The same SVG (WB-u-E_TRWX.svg) is wider than a 768px tablet viewport',
     },
     lighthouseKnownIssues: {
       'performance-score': 'Scores about 58 on the throttled mobile profile, just under the 60 budget',
@@ -170,9 +172,11 @@ export const sites: Record<SiteId, SiteConfig> = {
       'single-h1': 'Home page has no <h1>',
     },
     responsiveKnownIssues: {
-      'tablet:no-horizontal-scroll': 'Home page is about 790px wide on a 768px tablet screen',
+      'mobile:no-horizontal-scroll': 'Home page has a minimum width of about 790px, so it overflows phones',
+      'tablet:no-horizontal-scroll': 'Same 790px minimum width overflows some tablet viewports',
     },
     lighthouseKnownIssues: {
+      'performance-score': 'Scores in the 50s on the throttled mobile profile, and varies run to run',
       lcp: 'Largest contentful paint is around 5 seconds on the throttled mobile profile',
     },
     linkKnownIssues: {
