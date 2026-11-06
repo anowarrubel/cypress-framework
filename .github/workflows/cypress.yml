@@ -71,8 +71,8 @@ jobs:
       # until Linux baselines are committed, unless it's asked for.
       RUN_VISUAL: ${{ (inputs.suite == 'visual' || inputs.update_snapshots) && '1' || '' }}
       UPDATE_SNAPSHOTS: ${{ inputs.update_snapshots && '1' || '' }}
-      SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
-      SAUCE_PASSWORD: ${{ secrets.SAUCE_PASSWORD }}
+      SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME || 'standard_user' }}
+      SAUCE_PASSWORD: ${{ secrets.SAUCE_PASSWORD || 'secret_sauce' }}
     steps:
       - uses: actions/checkout@v7
 

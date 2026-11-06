@@ -17,8 +17,8 @@ Cypress.Commands.add('loginAs', (user: SauceUser) => {
     // SAUCE_USERNAME / SAUCE_PASSWORD (CI secrets) win for the standard user.
     const creds = user === 'standard'
       ? {
-          username: Cypress.env('SAUCE_USERNAME') ?? users.standard.username,
-          password: Cypress.env('SAUCE_PASSWORD') ?? users.standard.password,
+          username: Cypress.env('SAUCE_USERNAME') || users.standard.username,
+          password: Cypress.env('SAUCE_PASSWORD') || users.standard.password,
         }
       : users[user];
 

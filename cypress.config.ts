@@ -36,7 +36,8 @@ export default defineConfig({
       require('cypress-mochawesome-reporter/plugin')(on);
 
       for (const [key, value] of Object.entries(process.env)) {
-        if (value !== undefined && PASS_THROUGH.test(key)) config.env[key] = value;
+        // An unset CI secret arrives as an empty string; leave it out so defaults apply.
+        if (value && PASS_THROUGH.test(key)) config.env[key] = value;
       }
 
       on('task', {
