@@ -5,6 +5,21 @@
  */
 import { appendFileSync, existsSync, readFileSync } from 'node:fs';
 
+// In GitHub Actions, failed tests become annotations on the run page.
+const reportFile = 'reports/index.json';
+if (process.env.GITHUB_ACTIONS && existsSync(reportFile)) {
+  const walk = (suite, file) => {
+    for (const t of suite.tests ?? []) {
+      if (!t.fail) continue;
+      const message = String(t.err?.message ?? 'failed').replace(/\r?\n/g, ' ').slice(0, 400);
+      console.log(`::error file=${file},title=${t.fullTitle}::${message}`);
+    }
+    for (const child of suite.suites ?? []) walk(child, file);
+  };
+  const report = JSON.parse(readFileSync(reportFile, 'utf8'));
+  for (const result of report.results ?? []) walk(result, result.file ?? '');
+}
+
 const file = 'reports/findings.jsonl';
 if (!existsSync(file)) {
   console.log('No findings were recorded in this run.');

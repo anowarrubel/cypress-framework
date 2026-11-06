@@ -5,6 +5,11 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    # Cypress, Lighthouse and the lint stack are pinned to what Node 18 and the
+    # current configs support; take majors by hand.
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
     groups:
       dev-tooling:
         patterns: ['eslint*', '@eslint/*', 'typescript*']
