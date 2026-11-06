@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Data layer fixture</title>
+    <script>
+      // Stand-ins for what a Tag Manager or Adobe Launch setup would do.
+      window.dataLayer = window.dataLayer || [];
+      window.adobeDataLayer = window.adobeDataLayer || [];
+      function addToCart() {
+        window.dataLayer.push({ event: 'add_to_cart', ecommerce: { currency: 'USD', value: 19.99 } });
+      }
+      function promoClick() {
+        window.adobeDataLayer.push({ event: 'promo:click', eventInfo: { path: 'page.promo' } });
+      }
+    </script>
+  </head>
+  <body>
+    <h1>Data layer fixture</h1>
+    <button onclick="addToCart()">Add to cart</button>
+    <button onclick="promoClick()">Open promo</button>
+  </body>
+</html>

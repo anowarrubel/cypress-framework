@@ -1,0 +1,17 @@
+node_modules/
+reports/
+cypress/screenshots/
+cypress/videos/
+cypress/downloads/
+cypress/snapshots/diff/
+
+# Env files
+.env
+.env.local
+.env.*.local
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+*.log

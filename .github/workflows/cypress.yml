@@ -1,0 +1,107 @@
+name: Cypress Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 2 * * *' # nightly, 02:00 UTC
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment to test
+        type: choice
+        options: [qa, dev, prod]
+        default: qa
+      site:
+        description: Site to test
+        type: choice
+        options: [all, demoqa, academybugs, saucedemo]
+        default: all
+      suite:
+        description: Test type
+        type: choice
+        options: [all, functional, accessibility, security, seo, analytics, performance, responsive, api, visual, i18n, links]
+        default: all
+      update_snapshots:
+        description: Write visual baselines (download them from the run artifacts and commit)
+        type: boolean
+        default: false
+
+concurrency:
+  group: cypress-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  TEST_ENV: ${{ inputs.environment || 'qa' }}
+  SITE: ${{ inputs.site || 'all' }}
+  SUITE: ${{ inputs.suite || 'all' }}
+
+jobs:
+  static:
+    name: Typecheck and lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+        env:
+          CYPRESS_INSTALL_BINARY: '0'
+      - run: npm run typecheck
+      - run: npm run lint
+
+  test:
+    name: ${{ matrix.browser }}
+    needs: static
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chrome, firefox]
+    env:
+      # Visual baselines are per OS and browser. CI skips the visual suite
+      # until Linux baselines are committed, unless it's asked for.
+      RUN_VISUAL: ${{ (inputs.suite == 'visual' || inputs.update_snapshots) && '1' || '' }}
+      UPDATE_SNAPSHOTS: ${{ inputs.update_snapshots && '1' || '' }}
+      SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
+      SAUCE_PASSWORD: ${{ secrets.SAUCE_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Run Cypress
+        uses: cypress-io/github-action@v7
+        with:
+          browser: ${{ matrix.browser }}
+          install-command: npm ci
+          command: npm run t -- --suite=${{ env.SUITE }} --site=${{ env.SITE }} --env=${{ env.TEST_ENV }} --browser=${{ matrix.browser }} --yes
+
+      - name: Summarise findings
+        if: always()
+        run: npm run summary
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: cypress-report-${{ matrix.browser }}-${{ env.TEST_ENV }}
+          path: |
+            reports/
+            cypress/screenshots/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload new visual baselines
+        if: ${{ inputs.update_snapshots && matrix.browser == 'chrome' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: visual-baselines
+          path: cypress/snapshots/baseline/
+          retention-days: 14

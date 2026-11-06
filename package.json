@@ -1,0 +1,37 @@
+{
+  "name": "cypress-framework",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cypress + TypeScript suite that runs functional, accessibility, security, SEO, analytics, performance, responsive, API, visual, i18n and link checks against several sites and environments.",
+  "scripts": {
+    "t": "node scripts/run.mjs",
+    "open": "cypress open",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "summary": "node scripts/summary.mjs"
+  },
+  "engines": {
+    "node": ">=18.17"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@types/node": "^18.19.130",
+    "@types/pixelmatch": "^5.2.6",
+    "@types/pngjs": "^6.0.5",
+    "axe-core": "^4.14.0",
+    "chrome-launcher": "^1.2.3",
+    "cypress": "^13.17.0",
+    "cypress-axe": "^1.7.0",
+    "cypress-mochawesome-reporter": "^5.0.0",
+    "dotenv": "^18.0.9",
+    "eslint": "^9.39.5",
+    "eslint-plugin-cypress": "^5.3.0",
+    "lighthouse": "^11.7.1",
+    "mochawesome-merge": "^5.1.1",
+    "mochawesome-report-generator": "^6.3.2",
+    "pixelmatch": "^5.3.0",
+    "pngjs": "^7.0.0",
+    "typescript": "5.6",
+    "typescript-eslint": "^8.72.1"
+  }
+}
