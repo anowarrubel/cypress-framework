@@ -32,6 +32,8 @@ export interface VisualPage {
   path: string;
   mask?: string[];
   viewport?: { width: number; height: number };
+  /** Selector that must be visible before the screenshot, so web fonts and late content have rendered. */
+  waitFor?: string;
   /** Share of pixels allowed to differ, 0-1. Default 0.002. */
   tolerance?: number;
 }
@@ -237,8 +239,8 @@ export const sites: Record<SiteId, SiteConfig> = {
     analytics: { vendors: [] },
     // Static pages only: a baseline is useless if the page changes by itself.
     visual: [
-      { name: 'login', path: '/' },
-      { name: 'login-mobile', path: '/', viewport: { width: 375, height: 812 } },
+      { name: 'login', path: '/', waitFor: '.login_logo' },
+      { name: 'login-mobile', path: '/', waitFor: '.login_logo', viewport: { width: 375, height: 812 } },
     ],
   },
 };

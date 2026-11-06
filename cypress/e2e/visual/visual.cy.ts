@@ -20,7 +20,17 @@ if (!skipInCi) {
 
           cy.viewport(width, height);
           cy.visit(urlFor(site, page.path));
+          if (page.waitFor) cy.get(page.waitFor).should('be.visible');
+          // Web fonts only start loading once text is laid out; a screenshot taken
+          // before that is a blank page.
+          cy.document().then((doc) => doc.fonts.ready);
           cy.document().its('fonts.status').should('eq', 'loaded');
+          // Keep the layout from depending on the OS scrollbar width.
+          cy.document().then((doc) => {
+            const style = doc.createElement('style');
+            style.textContent = 'html { scrollbar-width: none; } ::-webkit-scrollbar { display: none; }';
+            doc.head.appendChild(style);
+          });
 
           let actualPath = '';
           cy.screenshot(shot, {
