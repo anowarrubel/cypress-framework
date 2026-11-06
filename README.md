@@ -122,8 +122,9 @@ config/       env.ts, sites.ts, analytics-vendors.ts
 lib/          Node-side helpers behind cy.task: security, Lighthouse, image diff
 cypress/
   e2e/        one folder per suite
-  fixtures/   local pages used by the data layer demo
-  support/    page objects, check definitions, findings, analytics helpers
+  fixtures/   users.json (test logins), datalayer.html (data layer demo page)
+  support/    page objects, custom commands (cy.loginAs), check definitions, findings,
+              analytics helpers
 scripts/      run.mjs (the `npm run t` launcher), summary.mjs
 ```
 

@@ -8,8 +8,8 @@ export abstract class BasePage {
     this.site = getSite(siteId);
   }
 
-  visit(path = '/'): this {
-    cy.visit(urlFor(this.site, path));
+  visit(path = '/', options: { failOnStatusCode?: boolean } = {}): this {
+    cy.visit(urlFor(this.site, path), options);
     return this;
   }
 

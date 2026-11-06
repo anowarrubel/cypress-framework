@@ -122,9 +122,6 @@ export const sites: Record<SiteId, SiteConfig> = {
       'seo-score': 'Scores about 77: no meta description',
       lcp: 'Largest contentful paint is around 11 seconds on the throttled mobile profile',
     },
-    linkKnownIssues: {
-      'links-found': 'Category cards are click handlers, not anchors, so there is nothing to crawl',
-    },
     // Tag Manager announces itself with a 'gtm.js' event once it has loaded.
     analytics: { vendors: ['gtm', 'ua'], dataLayerEvents: ['gtm.js'] },
     // The BookStore API behind the site's "Book Store Application" section.

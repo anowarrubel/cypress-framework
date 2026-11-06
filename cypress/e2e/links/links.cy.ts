@@ -9,6 +9,20 @@ for (const site of activeSites()) {
     it(`first ${MAX_LINKS} same-site links on the home page respond without an error`, () => {
       cy.visit(urlFor(site, '/'));
 
+      // Client-rendered pages add their anchors after load; give them up to 5s.
+      cy.window().then(
+        (win) =>
+          new Cypress.Promise<void>((resolve) => {
+            const started = Date.now();
+            const timer = setInterval(() => {
+              if (win.document.querySelectorAll('a[href]').length > 0 || Date.now() - started > 5_000) {
+                clearInterval(timer);
+                resolve();
+              }
+            }, 200);
+          }),
+      );
+
       cy.location('origin').then((origin) => {
         cy.document().then((doc) => {
           const links = Array.from(doc.querySelectorAll<HTMLAnchorElement>('a[href]'))
