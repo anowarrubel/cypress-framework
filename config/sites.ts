@@ -177,6 +177,7 @@ export const sites: Record<SiteId, SiteConfig> = {
     lighthouseKnownIssues: {
       'performance-score': 'Scores in the 50s on the throttled mobile profile, and varies run to run',
       lcp: 'Largest contentful paint is around 5 seconds on the throttled mobile profile',
+      tbt: 'Total blocking time swings between runs on the shared CI runner and sometimes exceeds the budget',
     },
     linkKnownIssues: {
       'broken-link:/academy-team/': 'Linked from the home page but returns 404',
