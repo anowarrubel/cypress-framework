@@ -8,6 +8,12 @@ performance (Lighthouse), responsive, API, visual, i18n and broken-link checks
 run against three public demo sites (DemoQA, Academy Bugs, Sauce Demo), and
 GitHub Actions can run any combination on demand.
 
+The three sites are public practice apps with deliberate defects, so the known-issue
+lists below are long on purpose and each entry says why. They also have one host
+each: dev, qa and prod all resolve to the same URL until you set
+`<SITE>_<ENV>_URL`, so the environment switch is wired up but these sites can't show
+a difference between environments.
+
 Cypress counterpart of [playwright-framework](https://github.com/anowarrubel/playwright-framework): same sites, same check ids, same known-issue pattern.
 
 ## Setup
@@ -103,9 +109,9 @@ refresh them, look at the images, then commit:
 npm run t -- saucedemo visual --update
 ```
 
-CI needs its own Linux baselines: run the workflow with suite `visual` and
-`update_snapshots` ticked, download the `visual-baselines` artifact and commit
-it. Until then CI skips the visual suite on automatic runs.
+CI compares against the Linux baselines (`...-chrome-linux.png`). To refresh them,
+run the workflow with suite `visual` and `update_snapshots` ticked, download the
+`visual-baselines` artifact, look at the images and commit them.
 
 ### Reports
 
