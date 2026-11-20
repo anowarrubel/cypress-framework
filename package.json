@@ -18,7 +18,7 @@
     "@types/node": "^18.19.130",
     "@types/pixelmatch": "^5.2.6",
     "@types/pngjs": "^6.0.5",
-    "axe-core": "^4.14.0",
+    "axe-core": "^4.14.1",
     "chrome-launcher": "^1.2.3",
     "cypress": "^14.5.4",
     "cypress-axe": "^1.7.0",
